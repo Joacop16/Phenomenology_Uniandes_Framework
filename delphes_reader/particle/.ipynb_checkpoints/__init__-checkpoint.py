@@ -1,0 +1,4 @@
+from delphes_reader.particle.electron_particle import ElectronParticle
+from delphes_reader.particle.jet_particle import JetParticle
+from delphes_reader.particle.met_particle import MetParticle
+from delphes_reader.particle.muon_particle import MuonParticle
