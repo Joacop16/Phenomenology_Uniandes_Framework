@@ -1,5 +1,10 @@
 import ROOT
 import pandas as pd
+import matplotlib.pyplot as plt
+from ROOT import TCanvas #It is necessary to show plots with ROOT.
+from ROOT import TH1F #It is necessary to plot histograms with ROOT.
+from ROOT import THStack #It is necessary to plot many histograms at the same time with ROOT.
+from ROOT import TLegend #It is necessary to plot labels when you plot many histograms at the same time with ROOT.
 
 def get_kinematics_row(*args):
     ''' Extracts main kinematic variables of a particle (or more) and returns a dictionary with them.
@@ -76,10 +81,115 @@ def make_histograms(df,integral=1.0,hist_bins_dict=default_hist_bins_dict):
             hist_dict.update({key : h})
     return hist_dict
 
+def histos_matplotlib(Dataset, column_key, log = False, c = 'blue', file_name = '', nbins = 100):
+    ''' Uses matplotlib to create histograms using all data contained in a column of a DataFrame.  
+    Parameters:
+        Dataset (DataFrame)*: It is a DataFrame where each row correspond to a different particle and each column to its corresponding kinematic variable value.
+        column_key (string)*: It is the key of the column that we want to plot as a histogram.
+        c (string): Histogram color.
+        file_name (string): File name that would be used to save the plot.
+        nbins (float): Bins number.   
+    '''  
+    Data = Dataset[column_key]
+    if log: Data = np.log10(Data)
+    
+    fig = plt.figure(figsize = (6,4))
+    plt.hist(Data, bins = nbins, color = c, density=True)
+    
+    name = '$' + column_key.replace('#' , "\\" ).replace('(' , "[" ).replace(')' , "]" ) + '$'
+    plt.xlabel(fr'{name}', fontsize = 12)
+    plt.ylabel('A.U', fontsize = 12)
+    
+    Statistics = 'Mean = ' + str(round(Data.mean(),3))+ ", STD = " + str(round(Data.std(),3))
+    plt.title(Statistics, loc = 'right', fontsize = 12)
+    
+    if file_name != '': plt.savefig(file_name, bbox_inches='tight')
+    
+    plt.show()
+    
+def overlap_histos(kinematic_variable, Dict_Histos, alpha = 0.05, Stack = False, Log = False, Grid = False):
+    ''' Uses ROOT to overlap histograms using all kinematic variable's histograms contained in a Directory.
+    Parameters:
+        kinematic_variable (string)*: Name of the kinematic variable. It must be also the key to access the corresponding histograms inside Dict_Histos.
+        Dict_Histos (Python Directory)*: It is the directory that contains all the histograms. 
+        This Directory should have keys with the name of the signals, and each signal should have other dictionaries with the same structure as an output of make_histograms.
+        alpha (float): Histogram transparency. It must be between 0 and 1.
+        Stack (Boolean): If it is True, the plot of histograms will consider a Stack between them.
+        Log (Boolean): If it is True, the histogram will be plotted using log 10 scale.   
+        Grid (Boolean): If it is True, the canvas will plot a grid in the graphic.
+    Return:
+        THStack: Histos contains all the histograms with overlap or stack.
+        THCanvas: canvas allows to edit some features such as x limit after using this function.
+        THLegend: legend contains the labels of each signal.
+    '''        
+    canvas = TCanvas('','', 600, 400)
+    legend = TLegend(0.6,.8,0.89,.89)
+    legend.SetNColumns(4)
+    legend.SetLineWidth(1)
+
+    Histos = THStack('hist', '')
+    
+    for i in range(len(Dict_Histos.keys())):
+        signal = list(Dict_Histos.keys())[i]
+                
+        if (Dict_Histos[signal] != {}):
+            histo = Dict_Histos[signal][kinematic_variable]
+            histo.SetLineColor(i+1)
+            histo.SetFillColorAlpha(i+1, alpha)
+            histo.SetLineWidth(2)
+            histo.SetDirectory(0)
+            Histos.Add(histo)
+            legend.AddEntry(histo,signal)
+    
+    x_axis = kinematic_variable.replace('(' , "[" ).replace(')' , "]" )
+    
+    if (Stack):
+        Histos.Draw("hist")
+        Histos.SetTitle(f'; {x_axis}; Events')
+    else:
+        Histos.Draw("histnostack")
+        Histos.SetTitle(f'; {x_axis}; A.U')
+    
+    if Log: 
+        canvas.SetLogy()
+        Histos.SetMinimum(10)
+        Histos.SetMaximum(1e8)
+        
+    if Grid: canvas.SetGrid()
+    
+    canvas.Draw()
+    legend.Draw('same')
+    
+    return Histos, canvas, legend
+
+def sum_histos(histo_list):
+    ''' Uses ROOT to sum histograms using all histograms contained in a list. Each histogram must be normalized by the number of physical events.
+    Parameters:
+        histo_list (TH1F list)*: Contains all histograms that will be summed.
+    Return:
+        TH1F: Histogram that is the sum of all histograms in the list.
+    '''            
+    result = TH1F('sum', 'sum', histo_list[0].GetNbinsX(),0.0,histo_list[0].GetBinWidth(0)*histo_list[0].GetNbinsX())
+    result.SetDirectory(0)
+    
+    for histo in histo_list:
+        for i in range(histo.GetNbinsX()):
+            #Sumemos los bines
+            sum_ = result.GetBinContent(i + 1)
+            sum_ = sum_ + histo.GetBinContent(i + 1)
+            result.SetBinContent(i+1, sum_)
+            #Sumemos el error
+            err_ = result.GetBinError(i + 1)
+            err_ = err_ + histo.GetBinError(i+1)
+            result.SetBinError(i+1, err_)
+        
+    return result
+
 def generate_csv(directory_list,file_name):
     ''' Uses Pandas to create a csv file using all data contained in a list of directories.  
     Parameters:
         directory_list (Python list): It is a list where each member is a directory with the structure of get_kinematics_row outputs.
+        file_name (string): It is the name that the .csv file will have.
     '''      
     Data = pd.DataFrame()
     for directory_kinematics in directory_list:
