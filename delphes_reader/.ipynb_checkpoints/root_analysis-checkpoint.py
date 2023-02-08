@@ -80,7 +80,8 @@ def generate_csv(directory_list,file_name):
     ''' Uses Pandas to create a csv file using all data contained in a list of directories.  
     Parameters:
         directory_list (Python list): It is a list where each member is a directory with the structure of get_kinematics_row outputs.
-    '''      Data = pd.DataFrame()
+    '''      
+    Data = pd.DataFrame()
     for directory_kinematics in directory_list:
         row = pd.DataFrame.from_dict(directory_kinematics, orient = "index").T
         Data = pd.concat([Data,row]) 
