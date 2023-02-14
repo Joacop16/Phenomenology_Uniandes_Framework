@@ -26,6 +26,7 @@ class JetParticle(Particle):
             event.GetLeaf("Jet.Phi").GetValue(j), 
             event.GetLeaf("Jet.Mass").GetValue(j)
         )
+        self.Flavor   = int(event.GetLeaf("Jet.Flavor").GetValue(j))
         self.BTag   = int(event.GetLeaf("Jet.BTag").GetValue(j))
         self.TauTag = int(event.GetLeaf("Jet.TauTag").GetValue(j))
         self.Charge = event.GetLeaf("Jet.Charge").GetValue(j)
