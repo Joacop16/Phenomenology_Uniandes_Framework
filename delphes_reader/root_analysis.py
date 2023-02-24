@@ -6,14 +6,14 @@ from ROOT import TH1F #It is necessary to plot histograms with ROOT.
 from ROOT import THStack #It is necessary to plot many histograms at the same time with ROOT.
 from ROOT import TLegend #It is necessary to plot labels when you plot many histograms at the same time with ROOT.
 
-def get_kinematics_row(*args):
+def get_kinematics_row(particle_list:list):
     ''' Extracts main kinematic variables of a particle (or more) and returns a dictionary with them.
     Parameters:
         *args (Particle): arguments could be many particle as it want to get its kinematics variable. For example: muons[0],muons[1] where muons is a list of muon particles.
     Return:
         Python dictionary: Contains main kinematic variables.
     '''  
-    particles=list(args)
+    particles= list(particle_list)
     co_particles=particles.copy()
     row = {} #{'header': value}
     for particle in particles:
