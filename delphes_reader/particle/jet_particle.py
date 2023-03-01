@@ -2,11 +2,10 @@ from delphes_reader.particle.abstract_particle import Particle
 import random
 
 JET_TYPES={
-        "BTag0_TauTag0_CTag0":"l_jet",
-        "BTag1_TauTag0_CTag0":"b_jet",
-        "BTag0_TauTag1_CTag0":"tau_jet",
-        "BTag0_TauTag0_CTag1":"c_jet"
-    }
+        "BTag0_TauTag0":"l_jet",
+        "BTag1_TauTag0":"b_jet",
+        "BTag0_TauTag1":"tau_jet"
+}
 
 class JetParticle(Particle):
     ''' Particle class object JetParticle: 
@@ -44,7 +43,7 @@ class JetParticle(Particle):
         Returns:
             str: particle type.
         '''
-        return JET_TYPES.get(f'BTag{self.BTag}_TauTag{self.TauTag}_CTag{self.CTag}',"other_jet")
+        return JET_TYPES.get(f'BTag{self.BTag}_TauTag{self.TauTag}',"other_jet")
     
     def c_tagging(self):
         ''' Returns CTag. It could be 0 or 1.
@@ -53,10 +52,7 @@ class JetParticle(Particle):
             float: CTag.
         '''
         random_number = random.random()
-        CTag = 0
-        if(self.BTag == 0 and self.TauTag == 0):
-            if(self.Flavor == 4 and random_number < 0.6):
-                CTag = 1
-            elif(self.Flavor != 4 and random_number < 0.1): 
-                CTag = 1       
-        return CTag
+        
+        if(self.Flavor == 4 and random_number < 0.6): return 1
+        elif(self.Flavor != 4 and random_number < 0.1): return 1
+        else: return 0
