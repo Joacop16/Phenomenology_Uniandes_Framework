@@ -1,8 +1,8 @@
-from delphes_reader.particle.abstract_particle import Particle
-from delphes_reader.particle.electron_particle import ElectronParticle
-from delphes_reader.particle.jet_particle import JetParticle
-from delphes_reader.particle.met_particle import MetParticle
-from delphes_reader.particle.muon_particle import MuonParticle
+from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particle
+from Uniandes_Framework.delphes_reader.particle.electron_particle import ElectronParticle
+from Uniandes_Framework.delphes_reader.particle.jet_particle import JetParticle
+from Uniandes_Framework.delphes_reader.particle.met_particle import MetParticle
+from Uniandes_Framework.delphes_reader.particle.muon_particle import MuonParticle
 
 
 jets_names_dic = {
@@ -187,9 +187,9 @@ def get_good_leptons(thing,kin_cuts=DEFAULT_CUTS):
     ''' Returns a python directory that contains lepton particles that are within the range of kinematic cuts contained in kin_cuts.
     Parameters:
         thing (Particle python directory or Tchain event): It could be a dictonary that contains all lepton particles separated by their type as a key of the directory, or a delphes file (.root) event.
-        kin_cuts (python dictionary): Contains dictionaries of kinematic cuts for each particle type. Those dictionaries should have the keys "pt_min_cut", "pt_max_cut", "eta_min_cut" and "eta_max_cut".
+        kin_cuts (dict): Contains dictionaries of kinematic cuts for each particle type. Those dictionaries should have the keys "pt_min_cut", "pt_max_cut", "eta_min_cut" and "eta_max_cut".
     Return:
-        Particle (python dictionary): Contains all particles that that are within the range of kinematic cuts. This dictionary contains all jet particles separated by their type as a key of the directory.
+        Particle (dict): Contains all particles that that are within the range of kinematic cuts. This dictionary contains all jet particles separated by their type as a key of the directory.
     '''
     if type(thing) == dict :
         leptons_dic=thing
