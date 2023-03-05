@@ -1,17 +1,13 @@
 from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particle
        
 class ElectronParticle(Particle):
-    ''' A class representing an electron particle.
+    ''' A class representing an electron particle initialized from the Electron Leaf in Delphes files.
 
     Attributes:
         TLV (TLorentzVector): A TLorentzVector object that defines the electron's momentum and energy.
         Charge (float): The electric charge of the electron.
         Name (str): The name of the particle ("e" for electron).
         Type (str): The type of the particle ("electron" for an electron).
-
-    Methods:
-        SetCharge(charge):
-            Sets the electric charge of the electron.
 
     Example:
         To create an ElectronParticle object using data from a delphes file event:
