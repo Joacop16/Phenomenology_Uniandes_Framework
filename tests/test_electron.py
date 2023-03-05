@@ -1,14 +1,15 @@
 import pytest,os
 import ROOT
 from Uniandes_Framework.delphes_reader.particle.electron_particle import ElectronParticle
-
+from Uniandes_Framework.delphes_reader import Quiet 
 @pytest.fixture()
 def event():
-    tree = ROOT.TChain("Delphes;1") 
-    tree.Add(os.path.join("Uniandes_Framework","tests","data","delphes_test.root"))
-    for event in tree:
-        return event
-        break
+    with Quiet():
+        tree = ROOT.TChain("Delphes;1") 
+        tree.Add(os.path.join("Uniandes_Framework","tests","data","delphes_test.root"))
+        for event in tree:
+            return event
+            break
 
 def test_electron_particle(event):
     electron = ElectronParticle(event, 0)
