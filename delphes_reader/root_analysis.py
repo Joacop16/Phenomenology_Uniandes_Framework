@@ -1,10 +1,14 @@
 import ROOT
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
+
 from ROOT import TCanvas #It is necessary to show plots with ROOT.
 from ROOT import TH1F #It is necessary to plot histograms with ROOT.
 from ROOT import THStack #It is necessary to plot many histograms at the same time with ROOT.
 from ROOT import TLegend #It is necessary to plot labels when you plot many histograms at the same time with ROOT.
+from ROOT import TFile #It is necessary to save histograms in a .root file.
+
 
 def get_kinematics_row(particle_list:list):
     ''' Extracts main kinematic variables of a particle (or more) and returns a dictionary with them.
@@ -197,7 +201,33 @@ def generate_csv(directory_list,file_name):
         Data = pd.concat([Data,row]) 
         Data.reset_index(drop=True, inplace=True)
     Data.to_csv(file_name, index= False)
+    
+    
+def Write_ROOT_File(name, Dict_Hist):
+    
+    ROOT_File = TFile.Open(name, 'RECREATE') 
+    
+    for key in Dict_Hist.keys():
+        folder = ROOT_File.mkdir(key) 
+        folder.cd()
+        Dict_Hist[key].Write()
+    
+    ROOT_File.Close()
+    
+def Write_txt_file_with_high_per_bin(name, Dict_Hist):
+    
+    for key in Dict_Hist.keys():
+        histo = Dict_Hist[key]
+        
+        x_list = []
+        y_list = []
+        for i in range(1, histo.GetNbinsX()):
+            x_list.append(histo.GetBinCenter(i))
+            y_list.append(histo.GetBinContent(i))  
 
+        Data = pd.concat([pd.DataFrame(x_list),pd.DataFrame(y_list)], axis = 1)
+        np.savetxt(f'{name}_{key}.txt', Data.values)             
+    
 class Quiet:
     ''' Context manager for silencing certain ROOT operations.  Usage:
     with Quiet(level = ROOT.kInfo+1):

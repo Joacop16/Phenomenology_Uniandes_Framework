@@ -1,6 +1,7 @@
 from multiprocessing import cpu_count
 from multiprocessing import Pool
 
+import numpy as np
 import pandas as pd
 from xgboost  import XGBClassifier
 from sklearn.metrics import accuracy_score
@@ -8,8 +9,8 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
 
-from ml_tools.abstract_classifier import Abstract_Classifier
-from ml_tools.bc_model import BC_Model
+from Uniandes_Framework.ml_tools.abstract_classifier import Abstract_Classifier
+from Uniandes_Framework.ml_tools.tools import dataframe_correlation
 
 DEF_PARAMETERS = {
     "n_estimators":[
@@ -55,8 +56,17 @@ class XGB_Classifier(Abstract_Classifier):
             self._nthread=4
         self._parameters=kwargs.get("parameters",DEF_PARAMETERS)
         super().__init__(*args,**kwargs)
+        
+    def filter_by_features(self):
+        best_features = self.get_important_features()
+        
+        self.bkg_data_balanced = self.bkg_data_balanced.loc[:, best_features]
+        self.signal_data_balanced = self.bkg_data_balanced.loc[:, best_features]
+        self.trainPred = self.trainPred.loc[:, best_features]
+        self.testPred = self.testPred.loc[:, best_features]
     
-    def get_good_params(self):
+    def get_good_model(self):
+        
         gbc = XGBClassifier(
             objective= 'binary:logistic',
             nthread=self._nthread,
@@ -77,37 +87,59 @@ class XGB_Classifier(Abstract_Classifier):
         self.max_depth=cv.best_params_["max_depth"]
         
         print("="*70)
-        print(f"For the {self.signal_names} model")
+        print(f"For the {self.model_name} model")
         print(f"the Best Parameters are {cv.best_params_}")
-        return cv.best_params_
+        return cv.best_estimator_
     
-    def fit_model(self):
-        self.get_good_params()
-        self.model = BC_Model(
-            make_pipeline(
-                StandardScaler(), 
-                XGBClassifier(
-                    objective= 'binary:logistic',
-                    learning_rate=self.learning_rate,
-                    n_estimators=self.n_estimators,
-                    max_depth=self.max_depth,
-                    nthread=max(self._n_cpu,1),
-                    use_label_encoder=False
-                )
-            )
-        )
-        self.model.fit(self.trainPred, self.trainLab)
-        
+    def important_features(self):
+        importances = self.model.feature_importances_
+        features = list(self.signal_data_balanced.keys())
+        ranking = np.argsort(-np.abs(importances))
+        return [[features[i], importances[i]] for i in ranking] 
+
+    def get_metrics(self, verbose = False):
+        self.model = self.get_good_model()
+                
         test_preds = self.model.predict(self.testPred)
         test_accuracy = accuracy_score(self.testLab,test_preds)
         
         train_preds = self.model.predict(self.trainPred)
         train_accuracy = accuracy_score(self.trainLab, train_preds)
-        self.importances_df=pd.DataFrame(
-            self.model.sorted_feature_importance(self.features)
-        )
-        print(f"the train accuracy is {train_accuracy}")
-        print(f"the test accuracy is {test_accuracy}")
-        print("the most important variables are")
-        print(self.importances_df)
-        print("="*70)
+        
+        self.importances_df = pd.DataFrame(self.important_features())
+        
+        if verbose:
+            print(f"the train accuracy is {train_accuracy}")
+            print(f"the test accuracy is {test_accuracy}")
+            print("the most important variables are")
+            print(self.importances_df)
+            print("="*70)
+            
+        return test_accuracy, train_accuracy, self.importances_df
+    
+    def get_important_features(self):
+        
+        feat_importants = list(self.importances_df[0])
+        df_correlation = dataframe_correlation(self.bkg_data_balanced)
+
+        limit_correl_value = 0.6
+
+        while len(feat_importants) > 10:
+            len_i = len(feat_importants)
+
+            for key_1 in feat_importants:
+                for key_2 in df_correlation[key_1].keys():
+                    if key_1 == key_2: continue
+                    if not (key_2 in feat_importants): continue
+                    if(abs(df_correlation[key_1][key_2]) >= limit_correl_value): 
+                        if (len(feat_importants) > 10): feat_importants.remove(key_2)
+
+            len_f = len(feat_importants)
+            if (len_f == len_i): limit_correl_value = limit_correl_value - 0.01   
+            
+        self.feat_importants = feat_importants
+        
+        return feat_importants
+
+
+    
