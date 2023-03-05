@@ -1,6 +1,10 @@
-import pytest
+import pytest,os
+import ROOT
 from ROOT import TLorentzVector
 from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particle
+from Uniandes_Framework.delphes_reader.particle.electron_particle import ElectronParticle
+from Uniandes_Framework.delphes_reader import Quiet 
+
 
 @pytest.fixture
 def particle():
@@ -82,3 +86,33 @@ def test_delta_r(particle):
 def test_tlv():
     tlv = TLorentzVector(1,2,3,4)
     assert isinstance(tlv, TLorentzVector)
+    
+# Create a fixture to load a Delphes event file for testing
+@pytest.fixture
+def event():
+    with Quiet():
+        tree = ROOT.TChain("Delphes")
+        tree.Add(os.path.join("Uniandes_Framework","tests","data","delphes_test.root"))
+        return next(iter(tree))
+
+# Define a test function to test the ElectronParticle class
+def test_electron_particle(event):
+    # Initialize an ElectronParticle object
+    electron = ElectronParticle(event, 0)
+    
+    # Test the TLV attribute
+    assert electron.p == pytest.approx(187.9219)
+    assert electron.TLV.Pt() == pytest.approx(187.90409)             
+    assert electron.TLV.Eta() == pytest.approx(-0.01377586)
+    assert electron.TLV.Phi() == pytest.approx(2.29576)
+    assert electron.TLV.M() == pytest.approx(0.000511, rel = 1e-3)
+    
+    # Test the Charge attribute
+    assert electron.Charge == 1
+    
+    # Test the Name attribute
+    assert electron.Name == "e"
+    
+    # Test the Type attribute
+    assert electron.Type == "electron"
+
