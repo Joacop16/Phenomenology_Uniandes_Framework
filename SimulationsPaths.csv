@@ -26,6 +26,16 @@ Tau_LQ_1750,/Madgraph_Simulations/LeptoQuarks/tau_lq/tau_lq_m_1750,0.001836
 Tau_LQ_2000,/Madgraph_Simulations/LeptoQuarks/tau_lq/tau_lq_m_2000,0.0006038
 Tau_LQ_2250,/Madgraph_Simulations/LeptoQuarks/tau_lq/tau_lq_m_2250,0.0002119
 Tau_LQ_2500,/Madgraph_Simulations/LeptoQuarks/tau_lq/tau_lq_m_2500,7.806e-05
+Tau_Tau_0250,/Madgraph_Simulations/LeptoQuarks/Tau_Tau/M250_gU1_8,40.33
+Tau_Tau_0500,/Madgraph_Simulations/LeptoQuarks/Tau_Tau/M500_gU1_8,4.184
+Tau_Tau_0750,/Madgraph_Simulations/LeptoQuarks/Tau_Tau/M750_gU1_8,0.995
+Tau_Tau_1000,/Madgraph_Simulations/LeptoQuarks/Tau_Tau/M1000_gU1_8,0.3449
+Tau_Tau_1250,/Madgraph_Simulations/LeptoQuarks/Tau_Tau/M1250_gU1_8,0.147
+Tau_Tau_1500,/Madgraph_Simulations/LeptoQuarks/Tau_Tau/M1500_gU1_8,0.07285
+Tau_Tau_1750,/Madgraph_Simulations/LeptoQuarks/Tau_Tau/M1750_gU1_8,0.03964
+Tau_Tau_2000,/Madgraph_Simulations/LeptoQuarks/Tau_Tau/M2000_gU1_8,0.02337
+Tau_Tau_2250,/Madgraph_Simulations/LeptoQuarks/Tau_Tau/M2250_gU1_8,0.01466
+Tau_Tau_2500,/Madgraph_Simulations/LeptoQuarks/Tau_Tau/M2500_gU1_8,0.009684
 LQ_LQ_1000_wo_RHC,/Madgraph_Simulations/LeptoQuarks/lq_lq_wo_RHC/M1000_gU1_8,0.1982092
 LQ_LQ_1250_wo_RHC,/Madgraph_Simulations/LeptoQuarks/lq_lq_wo_RHC/M1250_gU1_8,0.03347837
 LQ_LQ_1500_wo_RHC,/Madgraph_Simulations/LeptoQuarks/lq_lq_wo_RHC/M1500_gU1_8,0.006548228
