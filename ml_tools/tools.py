@@ -47,7 +47,7 @@ def prepare_to_train(Signal_DataFrame, BKG_DataFrame, balance = True, verbose = 
         verbose (Boolean): Boolean that says if it is necessary to print the quantity of signal and background.
     Return:
         Pandas DataFrame: X and Y to train Machine Learning Algorithmes.
-    '''      
+    '''
     if balance == True: num_rows_per_df = min(len(Signal_DataFrame), len(BKG_DataFrame))
     else: num_rows_per_df = max(len(Signal_DataFrame), len(BKG_DataFrame))
     
@@ -104,7 +104,7 @@ def hist_discriminator(path_model, csv_dict, path_to_save = '', best_features = 
         path_to_save (String): Path of the folder that we will be used to save all the histograms.
     Return:
         TH1F (Python dictionary): Directory with machine learning discriminator histograms. 
-    '''      
+    '''
     model = joblib.load(open(path_model, 'rb'))
     name = os.path.basename(path_model)
     name = name.split('.')[0]
