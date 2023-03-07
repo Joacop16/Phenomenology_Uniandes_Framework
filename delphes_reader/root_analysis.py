@@ -1,3 +1,4 @@
+import os
 import ROOT
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -203,14 +204,25 @@ def generate_csv(directory_list,file_name):
         Data.reset_index(drop=True, inplace=True)
     Data.to_csv(file_name, index= False)
     
-    
-def Write_ROOT_File(name, Dict_Hist):
-    
-    ROOT_File = TFile.Open(name, 'RECREATE') 
+def Save_Histograms_png(path_to_save, Dict_Hist, Log_Y = False):
     
     for key in Dict_Hist.keys():
-        Dict_Hist[key].Write()
+        histo = Dict_Hist[key]
+        canvas = TCanvas(key, " ", 0, 0, 1280, 720)
+        canvas.SetGrid()
+        if Log_Y: canvas.SetLogy()
+        histo.Draw("hist")
+        canvas.SaveAs(os.path.join(path_to_save,f"histograms_{key}.png").replace('#', '').replace('{', '').replace('}', '').replace(' ', '_'))        
+        
+def Write_ROOT_File(path_root_file, Dict_Hist):
     
+    ROOT_File = TFile.Open(path_root_file, 'RECREATE') 
+    
+    for key in Dict_Hist.keys():
+
+        Dict_Hist[key].SetName(key)
+        Dict_Hist[key].Write()
+
     ROOT_File.Close()
     
 def Read_ROOT_File(path_root_file, expected_keys):
@@ -219,7 +231,8 @@ def Read_ROOT_File(path_root_file, expected_keys):
     File = TFile.TFile.Open(path_root_file, 'READ')
     for key in expected_keys:
         histogram = File.Get(key)
-        histogram.SetDirectory(0)
+        try: histogram.SetDirectory(0)
+        except: pass
         Dict_hist[key] = histogram
     File.Close()
     return Dict_hist
@@ -231,8 +244,8 @@ def Write_txt_file_with_high_per_bin(name, Dict_Hist):
         
         high_list = []
         for i in range(1, histo.GetNbinsX()): high_list.append(histo.GetBinContent(i))  
-
-        np.savetxt(f'{name}_{key}.txt', high_list)             
+        txt_name = f'{name}_{key}.txt'
+        np.savetxt(txt_name.replace('#', '').replace('{', '').replace('}', '').replace(' ', '_'), high_list)             
     
 class Quiet:
     ''' Context manager for silencing certain ROOT operations.  Usage:
