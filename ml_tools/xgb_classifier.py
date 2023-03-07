@@ -10,7 +10,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
 
 from Uniandes_Framework.ml_tools.abstract_classifier import Abstract_Classifier
-from Uniandes_Framework.ml_tools.tools import dataframe_correlation
+from Uniandes_Framework.ml_tools import tools
 
 DEF_PARAMETERS = {
     "n_estimators":[
@@ -57,9 +57,8 @@ class XGB_Classifier(Abstract_Classifier):
         self._parameters=kwargs.get("parameters",DEF_PARAMETERS)
         super().__init__(*args,**kwargs)
         
-    def filter_by_features(self):
-        best_features = self.get_most_important_features()
-        
+    def filter_by_features(self, best_features = None):
+        if not (best_features): best_features = self.get_most_important_features()
         self.bkg_data_balanced = self.bkg_data_balanced.loc[:, best_features]
         self.signal_data_balanced = self.bkg_data_balanced.loc[:, best_features]
         self.trainPred = self.trainPred.loc[:, best_features]
@@ -92,7 +91,8 @@ class XGB_Classifier(Abstract_Classifier):
         return cv.best_estimator_
     
     def get_important_features(self):
-        self.model = self._get_good_model()
+        try: self.model
+        except AttributeError: self.model = self._get_good_model()
         importances = self.model.feature_importances_
         features = list(self.signal_data_balanced.keys())
         ranking = np.argsort(-np.abs(importances))
@@ -124,8 +124,9 @@ class XGB_Classifier(Abstract_Classifier):
             self.get_metrics()
             feat_importants = list(self.importances_df[0])
  
-        df_correlation = dataframe_correlation(self.bkg_data_balanced)
-
+        # df_correlation = tools.dataframe_correlation(tools.concat_data([self.bkg_data_balanced, self.signal_data_balanced], balance = True))
+    
+        df_correlation = tools.dataframe_correlation(self.bkg_data_balanced)
         limit_correl_value = 0.6
 
         while len(feat_importants) > 10:
