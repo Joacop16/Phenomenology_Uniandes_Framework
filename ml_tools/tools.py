@@ -21,7 +21,7 @@ def concat_signals(path_csv_list, balance = True):
     '''  
     Datas = {}
     for path in path_csv_list:
-        Datas[path] = pd.read_csv(path, index_col = 0)
+        Datas[path] = pd.read_csv(path)
         Datas[path] = Datas[path].sample(frac = 1) #mix Datas[path] rows
         
     keys = list(Datas.keys())
@@ -38,6 +38,20 @@ def concat_signals(path_csv_list, balance = True):
     
     return Data
 
+def concat_data(dataframe_list, balance = True):
+    sizes = [len(Data) for Data in dataframe_list]
+    if balance: num_rows_per_df = min(sizes)
+    else: num_rows_per_df = max(sizes)
+    
+    Data = dataframe_list[0].head(num_rows_per_df)
+    for i in range(1, len(dataframe_list)): Data = pd.concat([Data,  dataframe_list[i].head(num_rows_per_df)], axis = 0)
+    
+    Data = Data.dropna() #Delete rows with nan values
+    Data = Data.sample(frac = 1) #mix Datas[path] rows
+    Data.reset_index(drop=True, inplace=True)    
+    
+    return Data
+
 def prepare_to_train(Signal_DataFrame, BKG_DataFrame, balance = True, verbose = False):
     ''' Create X and Y DataFrames to train Machine Learning Algorithmes using a Signal DataFrame and BKG DataFrame.
     Parameters:
@@ -47,7 +61,7 @@ def prepare_to_train(Signal_DataFrame, BKG_DataFrame, balance = True, verbose = 
         verbose (Boolean): Boolean that says if it is necessary to print the quantity of signal and background.
     Return:
         Pandas DataFrame: X and Y to train Machine Learning Algorithmes.
-    '''      
+    '''
     if balance == True: num_rows_per_df = min(len(Signal_DataFrame), len(BKG_DataFrame))
     else: num_rows_per_df = max(len(Signal_DataFrame), len(BKG_DataFrame))
     
@@ -104,8 +118,9 @@ def hist_discriminator(path_model, csv_dict, path_to_save = '', best_features = 
         path_to_save (String): Path of the folder that we will be used to save all the histograms.
     Return:
         TH1F (Python dictionary): Directory with machine learning discriminator histograms. 
-    '''      
+    '''
     model = joblib.load(open(path_model, 'rb'))
+    
     name = os.path.basename(path_model)
     name = name.split('.')[0]
     
@@ -118,7 +133,7 @@ def hist_discriminator(path_model, csv_dict, path_to_save = '', best_features = 
         histo.SetLineColor(kBlue)
         histo.SetFillColor(kBlue)
         
-        data_to_evaluate = pd.read_csv(csv_dict[key], index_col = 0)
+        data_to_evaluate = pd.read_csv(csv_dict[key])
         if (len(best_features) != 0): data_to_evaluate = data_to_evaluate.loc[:, best_features]
         
         scores = model.predict_proba(data_to_evaluate)[:,1]
@@ -135,11 +150,11 @@ def hist_discriminator(path_model, csv_dict, path_to_save = '', best_features = 
             c1.SetGrid()
             c1.SetLogy()
             histo.Draw("hist")
-            Data.to_csv(os.path.join(path_to_save,f"{name}_{key}.csv"),index=False)
-            c1.SaveAs(os.path.join(path_to_save,f"{name}_{key}.png"))
+            Data.to_csv(os.path.join(path_to_save,f"score_{name}_{key}.csv"),index=False)
+            c1.SaveAs(os.path.join(path_to_save,f"histogram_{name}_{key}.png"))
             
     if (path_to_save != ''): 
         Write_ROOT_File(os.path.join(path_to_save,f"Histograms_{name}.root"), histos)
-        Write_txt_file_with_high_per_bin(os.path.join(path_to_save,f"{name}"), histos)
+        Write_txt_file_with_high_per_bin(os.path.join(path_to_save,f"high_per_bin_{name}"), histos)
         
     return histos    

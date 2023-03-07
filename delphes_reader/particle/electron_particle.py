@@ -1,4 +1,4 @@
-from delphes_reader.particle.abstract_particle import Particle
+from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particle
 
 class ElectronParticle(Particle):
     ''' Particle class object ElectronParticle: 

@@ -1,4 +1,4 @@
-from delphes_reader.particle.abstract_particle import Particle
+from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particle
 import random
 
 JET_TYPES={
@@ -30,7 +30,7 @@ class JetParticle(Particle):
             event.GetLeaf("Jet.Mass").GetValue(j)
         )
         self.Flavor = int(event.GetLeaf("Jet.Flavor").GetValue(j))
-        self.CTag   = int(c_tagging(self))
+        self.CTag   = int(self.c_tagging())
         self.BTag   = int(event.GetLeaf("Jet.BTag").GetValue(j))
         self.TauTag = int(event.GetLeaf("Jet.TauTag").GetValue(j))
         self.Charge = event.GetLeaf("Jet.Charge").GetValue(j)
