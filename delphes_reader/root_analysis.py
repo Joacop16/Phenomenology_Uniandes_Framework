@@ -243,10 +243,23 @@ def Write_txt_file_with_high_per_bin(name, Dict_Hist):
         histo = Dict_Hist[key]
         
         high_list = []
-        for i in range(1, histo.GetNbinsX()): high_list.append(histo.GetBinContent(i))  
+        for i in range(1, histo.GetNbinsX()+1): high_list.append(histo.GetBinContent(i))  
         txt_name = f'{name}_{key}.txt'
-        np.savetxt(txt_name.replace('#', '').replace('{', '').replace('}', '').replace(' ', '_'), high_list)             
+        np.savetxt(txt_name.replace('#', '').replace('{', '').replace('}', '').replace(' ', '_'), high_list)  
+        
+def review_holes_in_histograms(Dict_Hist):
     
+    keys_histos_with_holes = []
+    for key in Dict_Hist.keys():
+        histo = Dict_Hist[key]
+        
+        for i in range(1,histo.GetNbinsX()+1): 
+            if (histo.GetBinContent(i) == 0): 
+                keys_histos_with_holes.append(key)
+                break
+                break
+    return keys_histos_with_holes
+
 class Quiet:
     ''' Context manager for silencing certain ROOT operations.  Usage:
     with Quiet(level = ROOT.kInfo+1):
