@@ -8,6 +8,8 @@ from sklearn.metrics import accuracy_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
+from sklearn.decomposition import PCA
+
 
 from Uniandes_Framework.ml_tools.abstract_classifier import Abstract_Classifier
 from Uniandes_Framework.ml_tools import tools
@@ -56,14 +58,7 @@ class XGB_Classifier(Abstract_Classifier):
             self._nthread=4
         self._parameters=kwargs.get("parameters",DEF_PARAMETERS)
         super().__init__(*args,**kwargs)
-        
-    def filter_by_features(self, best_features = None):
-        if not (best_features): best_features = self.get_most_important_features()
-        self.bkg_data_balanced = self.bkg_data_balanced.loc[:, best_features]
-        self.signal_data_balanced = self.bkg_data_balanced.loc[:, best_features]
-        self.trainPred = self.trainPred.loc[:, best_features]
-        self.testPred = self.testPred.loc[:, best_features]
-    
+            
     def _get_good_model(self):
         
         gbc = XGBClassifier(
@@ -147,4 +142,11 @@ class XGB_Classifier(Abstract_Classifier):
         return feat_importants
 
 
-    
+    def filter_by_features(self, best_features = None, n_pca = 0):
+        if not (best_features): best_features = self.get_most_important_features()
+        self.bkg_data_balanced = self.bkg_data_balanced.loc[:, best_features]
+        self.signal_data_balanced = self.bkg_data_balanced.loc[:, best_features]
+        self.trainPred = self.trainPred.loc[:, best_features]
+        self.testPred = self.testPred.loc[:, best_features]
+        
+        pca = PCA(n_componets = n_pca)
