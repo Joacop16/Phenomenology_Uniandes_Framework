@@ -1,5 +1,4 @@
 from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particle
-       
 class ElectronParticle(Particle):
     ''' A class representing an electron particle initialized from the Electron Leaf in Delphes files.
 

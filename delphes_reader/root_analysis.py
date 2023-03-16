@@ -9,6 +9,7 @@ from ROOT import THStack #It is necessary to plot many histograms at the same ti
 from ROOT import TLegend #It is necessary to plot labels when you plot many histograms at the same time with ROOT.
 from ROOT import TFile #It is necessary to save histograms in a .root file.
 
+import uproot
 
 def get_kinematics_row(particle_list:list):
     ''' Extracts main kinematic variables of a particle (or more) and returns a dictionary with them.
@@ -208,25 +209,30 @@ def Write_ROOT_File(name, Dict_Hist):
     ROOT_File = TFile.Open(name, 'RECREATE') 
     
     for key in Dict_Hist.keys():
-        folder = ROOT_File.mkdir(key) 
-        folder.cd()
         Dict_Hist[key].Write()
     
     ROOT_File.Close()
+    
+def Read_ROOT_File(path_root_file, expected_keys):
+    
+    Dict_hist = {}
+    File = TFile.TFile.Open(path_root_file, 'READ')
+    for key in expected_keys:
+        histogram = File.Get(key)
+        histogram.SetDirectory(0)
+        Dict_hist[key] = histogram
+    File.Close()
+    return Dict_hist
     
 def Write_txt_file_with_high_per_bin(name, Dict_Hist):
     
     for key in Dict_Hist.keys():
         histo = Dict_Hist[key]
         
-        x_list = []
-        y_list = []
-        for i in range(1, histo.GetNbinsX()):
-            x_list.append(histo.GetBinCenter(i))
-            y_list.append(histo.GetBinContent(i))  
+        high_list = []
+        for i in range(1, histo.GetNbinsX()): high_list.append(histo.GetBinContent(i))  
 
-        Data = pd.concat([pd.DataFrame(x_list),pd.DataFrame(y_list)], axis = 1)
-        np.savetxt(f'{name}_{key}.txt', Data.values)             
+        np.savetxt(f'{name}_{key}.txt', high_list)             
     
 class Quiet:
     ''' Context manager for silencing certain ROOT operations.  Usage:

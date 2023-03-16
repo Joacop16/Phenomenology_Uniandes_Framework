@@ -1,3 +1,4 @@
+from Uniandes_Framework import delphes_reader
 from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particle
 from Uniandes_Framework.delphes_reader.particle.electron_particle import ElectronParticle
 from Uniandes_Framework.delphes_reader.particle.jet_particle import JetParticle
@@ -134,10 +135,7 @@ def get_good_jets(thing,kin_cuts=DEFAULT_CUTS):
     if type(thing) == dict :
         jets_dic=thing
     else:
-        try:
             jets_dic=get_jets(thing)
-        except:
-            raise Exception("Error: A dictionary or an event was expected.")
     return get_good_particles(jets_dic,kin_cuts)
 
 def get_muons(event):
