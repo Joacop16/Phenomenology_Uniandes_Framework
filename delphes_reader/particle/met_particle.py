@@ -20,7 +20,7 @@ class MetParticle(Particle):
         for j in range(n_met):
             partMet.SetPtEtaPhiM(
                 event.GetLeaf("MissingET.MET").GetValue(j), 
-                event.GetLeaf("MissingET.Eta").GetValue(j), 
+                0.00,
                 event.GetLeaf("MissingET.Phi").GetValue(j), 
                 0.00 #GeV
             )
