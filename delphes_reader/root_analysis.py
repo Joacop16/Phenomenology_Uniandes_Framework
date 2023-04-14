@@ -92,6 +92,7 @@ def histos_matplotlib(Dataset, column_key, log = False, c = 'blue', file_name = 
     Parameters:
         Dataset (DataFrame)*: It is a DataFrame where each row correspond to a different particle and each column to its corresponding kinematic variable value.
         column_key (string)*: It is the key of the column that we want to plot as a histogram.
+        log (Boolean): If it is True, the Dataset will be readed using log 10 scale.
         c (string): Histogram color.
         file_name (string): File name that would be used to save the plot.
         nbins (float): Bins number.   
@@ -114,11 +115,11 @@ def histos_matplotlib(Dataset, column_key, log = False, c = 'blue', file_name = 
     plt.show()
     
 def overlap_histos(kinematic_variable, Dict_Histos, alpha = 0.05, Stack = False, Log = False, Grid = False):
-    ''' Uses ROOT to overlap histograms using all kinematic variable's histograms contained in a Directory.
+    ''' Uses ROOT to overlap histograms using all kinematic variable's histograms contained in a Dicctionary.
     Parameters:
         kinematic_variable (string)*: Name of the kinematic variable. It must be also the key to access the corresponding histograms inside Dict_Histos.
-        Dict_Histos (Python Directory)*: It is the directory that contains all the histograms. 
-        This Directory should have keys with the name of the signals, and each signal should have other dictionaries with the same structure as an output of make_histograms.
+        Dict_Histos (Python Dicctionary)*: It is the dicctionary that contains all the histograms. 
+        This Dicctionary should have keys with the name of the signals, and each signal should have other dictionaries with the same structure as an output of make_histograms.
         alpha (float): Histogram transparency. It must be between 0 and 1.
         Stack (Boolean): If it is True, the plot of histograms will consider a Stack between them.
         Log (Boolean): If it is True, the histogram will be plotted using log 10 scale.   
@@ -191,21 +192,26 @@ def sum_histos(histo_list):
         
     return result
 
-def generate_csv(directory_list,file_name):
-    ''' Uses Pandas to create a csv file using all data contained in a list of directories.  
+def generate_csv(dictionary_list,file_name):
+    ''' Uses Pandas to create a csv file using all data contained in a list of dictionaries.  
     Parameters:
-        directory_list (Python list): It is a list where each member is a directory with the structure of get_kinematics_row outputs.
+        dictionary_list (Python list): It is a list where each member is a dictionary with the structure of get_kinematics_row outputs.
         file_name (string): It is the name that the .csv file will have.
     '''      
     Data = pd.DataFrame()
-    for directory_kinematics in directory_list:
-        row = pd.DataFrame.from_dict(directory_kinematics, orient = "index").T
+    for dictionary_kinematics in dictionary_list:
+        row = pd.DataFrame.from_dict(dictionary_kinematics, orient = "index").T
         Data = pd.concat([Data,row]) 
         Data.reset_index(drop=True, inplace=True)
     Data.to_csv(file_name, index= False)
     
 def Save_Histograms_png(path_to_save, Dict_Hist, Log_Y = False):
-    
+    ''' Uses Root to save all histograms contained in a python dictionary (Dict_Hist) as .png files. This function uses the keys of the dictionary to save each histogram.  
+    Parameters:
+        path_to_save (string): Folder name that will be used to save all histogramas as .png files.
+        Dict_Hist (Python Dictionary)*: It is the dictionary that contains all the histograms. 
+        Log_Y (Boolean): If it is True, the histogram will be plotted using log 10 Y-scale.   
+    '''  
     for key in Dict_Hist.keys():
         histo = Dict_Hist[key]
         canvas = TCanvas(key, " ", 0, 0, 1280, 720)
@@ -215,7 +221,11 @@ def Save_Histograms_png(path_to_save, Dict_Hist, Log_Y = False):
         canvas.SaveAs(os.path.join(path_to_save,f"histograms_{key}.png").replace('#', '').replace('{', '').replace('}', '').replace(' ', '_'))        
         
 def Write_ROOT_File(path_root_file, Dict_Hist):
-    
+    ''' Uses Root to save all histograms contained in a python dictionary (Dict_Hist) in a .root file.  
+    Parameters:
+        path_root_file (string): .root file name that would be used to save it.
+        Dict_Hist (Python Dictionary)*: It is the dictionary that contains all the histograms. 
+    '''  
     ROOT_File = TFile.Open(path_root_file, 'RECREATE') 
     
     for key in Dict_Hist.keys():
@@ -226,7 +236,13 @@ def Write_ROOT_File(path_root_file, Dict_Hist):
     ROOT_File.Close()
     
 def Read_ROOT_File(path_root_file, expected_keys):
-    
+    ''' Uses Root to read all histograms contained in a .root file.  
+    Parameters:
+        path_root_file (string): .root file name that would be used to read it.
+        expected_keys (Python list)*: It contains the keys that was used to save the histograms in the .root file. 
+    Return:
+        Python Dictionary: Dictionary that contains all the histograms.
+    '''  
     Dict_hist = {}
     File = TFile.TFile.Open(path_root_file, 'READ')
     for key in expected_keys:
@@ -238,17 +254,26 @@ def Read_ROOT_File(path_root_file, expected_keys):
     return Dict_hist
     
 def Write_txt_file_with_high_per_bin(name, Dict_Hist):
-    
+    ''' Write .dat files with the high per bin of all histograms contained in a python dictionary (Dict_Hist).
+    Parameters:
+        name (string): File name that will be used as preffix to save the high per bin of all histograms as .dat files.
+        Dict_Hist (Python Dictionary)*: It is the dictionary that contains all the histograms. 
+    '''  
     for key in Dict_Hist.keys():
         histo = Dict_Hist[key]
         
         high_list = []
         for i in range(1, histo.GetNbinsX()+1): high_list.append(histo.GetBinContent(i))  
-        txt_name = f'{name}_{key}.txt'
+        txt_name = f'{name}_{key}.dat'
         np.savetxt(txt_name.replace('#', '').replace('{', '').replace('}', '').replace(' ', '_'), high_list)  
         
 def review_holes_in_histograms(Dict_Hist):
-    
+    ''' Returns a list with the names of all histograms with holes contained in a python dictionary (Dict_Hist). 
+    Parameters:
+        Dict_Hist (Python Dictionary)*: It is the dictionary that contains all the histograms. 
+    Return:
+        Python list: List with the names of all histograms with holes.
+    '''  
     keys_histos_with_holes = []
     for key in Dict_Hist.keys():
         histo = Dict_Hist[key]
