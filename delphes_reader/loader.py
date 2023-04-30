@@ -9,10 +9,28 @@ URL_DEF_PATHS = "https://raw.githubusercontent.com/Phenomenology-group-uniandes/
 class DelphesLoader():
     """
     Class to load the delphes root outputs
+
+    Attributes
+    ----------
+    name : str
+        Name of the signal to load
+    xs : str
+        Cross section of the signal
+    Forest : list
+        List of the delphes root outputs
+
+    Methods
+    -------
+    set_glob(glob: str) -> None
+        Set the glob to search the delphes root outputs
+    get_glob() -> str
+        Get the glob to search the delphes root outputs
+    get_nevents() -> int
+        Get the number of events in the delphes root outputs
     """
 
     # Constructor
-    def __init__(self, name_signal, path=None):
+    def __init__(self, name_signal: str, path: str=None) -> None:
         """
         Parameters
         ----------
@@ -45,7 +63,7 @@ class DelphesLoader():
         print(load, flush=True)
 
     # path reader to simulation root outputs
-    def _read_path(self, path):
+    def _read_path(self, path: str) -> dict:
         """
         Read the path to the simulation root outputs
 
@@ -75,7 +93,7 @@ class DelphesLoader():
         return data
     
     # Set and get glob to search the delphes root outputs
-    def set_glob(self, glob):
+    def set_glob(self, glob: str) -> None:
         """
         Set the glob to search the delphes root outputs
 
@@ -86,7 +104,7 @@ class DelphesLoader():
         """
         self._glob = glob
     ##
-    def get_glob(self):
+    def get_glob(self) -> str:
         """
         Get the glob to search the delphes root outputs when glob is defined.
         if glob is not defined, set the default glob to '**/*.root' and return it
@@ -101,7 +119,7 @@ class DelphesLoader():
         return self._glob
 
     # Get the delphes root outputs
-    def _get_forest(self, glob = None):
+    def _get_forest(self, glob: str = None) -> list:
         """
         Get the delphes root outputs
 
@@ -131,7 +149,7 @@ class DelphesLoader():
         return natural_sort(forest)
     
     
-    def get_nevents(self,Forest = None):
+    def get_nevents(self, Forest: list = None) -> int:
         """
         Get the number of events in the delphes root outputs when Forest isn't None.
         if Forest is None, use the default Forest and return the number of events.
