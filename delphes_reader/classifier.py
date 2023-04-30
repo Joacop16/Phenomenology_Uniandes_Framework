@@ -71,7 +71,7 @@ def get_unified(part_dic):
         Particle (python dictionary): Contains all particles with the key "all".
     '''    
     unified = [particle for particles in part_dic.values() for particle in particles]
-    unified.sort(reverse=True, key=Particle.pt)
+    unified.sort(reverse=True, key=lambda x: x.pt)
     return {"all": unified}
     
 def get_muons(event):
@@ -105,7 +105,7 @@ def get_leptons(event):
     }
     
     for key in lepton_dic.keys():
-        lepton_dic[key].sort(reverse=True, key=Particle.pt)
+        lepton_dic[key].sort(reverse=True, key=lambda x: x.pt)
     
     return lepton_dic
 
@@ -127,11 +127,11 @@ def get_jets(event):
     
     # sorts the particles in descending order based on their pt attribute
     for key in jet_dict.keys():
-        jet_dict[key].sort(reverse=True, key=Particle.pt) # Sort the particles in descending order based on their pt attribute
+        jet_dict[key].sort(reverse=True, key=lambda x: x.pt) # Sort the particles in descending order based on their pt attribute
     
     return jet_dict
 
-def get_good_particles(particles_dic, kin_cuts=DEFAULT_CUTS):
+def get_good_particles(particles_dic, kin_cuts=None):
     ''' Returns a dictionary that contains particles within the range of kinematic cuts.
     Parameters:
         particles_dic (dict): Contains all particles separated by their type as a key of the dictionary.
@@ -139,6 +139,8 @@ def get_good_particles(particles_dic, kin_cuts=DEFAULT_CUTS):
     Return:
         dict: Contains all particles that are within the range of kinematic cuts.
     '''
+    if kin_cuts is None:
+        kin_cuts = DEFAULT_CUTS
     good_particles = {}
     unified_particles = get_unified(particles_dic)["all"]
     
@@ -149,7 +151,7 @@ def get_good_particles(particles_dic, kin_cuts=DEFAULT_CUTS):
         good_particles[particle_type] = []
         j = 1
         
-        for particle in sorted(particles, reverse=True, key=Particle.pt):
+        for particle in sorted(particles, reverse=True, key=lambda x: x.pt):
             if not particle.get_good_tag(kin_cuts) == 1:continue
                 
             crossed = False
@@ -168,7 +170,7 @@ def get_good_particles(particles_dic, kin_cuts=DEFAULT_CUTS):
     
     return good_particles
 
-def get_good_leptons(event_particles,kin_cuts=DEFAULT_CUTS):
+def get_good_leptons(event_particles,kin_cuts=None):
     ''' Returns a python directory that contains lepton particles that are within the range of kinematic cuts contained in kin_cuts.
     Parameters:
         event_particles (Particle python directory or Tchain event): It could be a dictonary that contains all lepton particles separated by their type as a key of the directory, or a delphes file (.root) event.
@@ -176,6 +178,8 @@ def get_good_leptons(event_particles,kin_cuts=DEFAULT_CUTS):
     Return:
         Particle (dict): Contains all particles that that are within the range of kinematic cuts. This dictionary contains all jet particles separated by their type as a key of the directory.
     '''
+    if kin_cuts is None:
+        kin_cuts = DEFAULT_CUTS
     if isinstance(event_particles, dict):
         leptons_dic=event_particles
     else:
@@ -192,7 +196,7 @@ def get_good_leptons(event_particles,kin_cuts=DEFAULT_CUTS):
 
     return leptons
 
-def get_good_jets(event_particles, kin_cuts=DEFAULT_CUTS):
+def get_good_jets(event_particles, kin_cuts=None):
     '''Returns a dictionary containing jet particles within a range of kinematic cuts.
     
     Parameters:
@@ -202,6 +206,8 @@ def get_good_jets(event_particles, kin_cuts=DEFAULT_CUTS):
     Returns:
         dict: Contains all jet particles that are within the range of kinematic cuts, separated by their type as keys in the dictionary.
     '''
+    if kin_cuts is None:
+        kin_cuts = DEFAULT_CUTS
     if isinstance(event_particles, dict):
         jets_dict = event_particles
     else:
@@ -209,10 +215,7 @@ def get_good_jets(event_particles, kin_cuts=DEFAULT_CUTS):
     
     good_jets_dict = {}
     for key in jets_dict.keys():
-        good_jets = []
-        for jet in jets_dict[key]:
-            if jet.get_good_tag(kin_cuts) == 1:
-                good_jets.append(jet)
+        good_jets = [ jet for jet in jets_dict[key] if jet.get_good_tag(kin_cuts) == 1 ]
         good_jets_dict[key] = good_jets
     
     return good_jets_dict
