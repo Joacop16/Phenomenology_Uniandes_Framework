@@ -94,7 +94,7 @@ def test_tlv():
 def event():
     with Quiet():
         tree = ROOT.TChain("Delphes")
-        tree.Add(os.path.join("Uniandes_Framework","tests","data","delphes_test.root"))
+        tree.Add(os.path.join(os.getcwd(),"tests","data","delphes_test.root"))
         return next(iter(tree))
 
 # Define a test function to test the ElectronParticle class
