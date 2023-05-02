@@ -25,14 +25,16 @@ class Quiet:
     back to what it was previously.
     '''
     def __init__(self, level=ROOT.kError+1):
+        self.oldlevel = ROOT.gErrorIgnoreLevel
         self.level = level
 
     def __enter__(self):
-        self.oldlevel = ROOT.gErrorIgnoreLevel
         ROOT.gErrorIgnoreLevel = self.level
 
     def __exit__(self, type, value, traceback):
         ROOT.gErrorIgnoreLevel = self.oldlevel
+
+
 
 def get_kinematics_row(particles : list)->dict:
     """Extracts main kinematic variables of a particle (or more) and returns a dictionary with them.
@@ -121,7 +123,14 @@ def make_histograms(df: pd.DataFrame, integral: float = 1.0, hist_bins_dict: dic
 
     return hist_dict
 
-def histos_matplotlib(Dataset: pd.DataFrame, column_key: str, log: bool = False, c: str = 'blue', file_name: str = '', nbins: int = 100) -> None:
+def histos_matplotlib(
+        Dataset: pd.DataFrame, 
+        column_key: str, 
+        log: bool = False, 
+        c: str = 'blue', 
+        file_name: str = '', 
+        nbins: int = 100
+        ) -> None:
     ''' Uses matplotlib to create histograms using all data contained in a column of a DataFrame.  
     Parameters:
         Dataset (DataFrame): It is a DataFrame where each row correspond to a different particle and each column to its corresponding kinematic variable value.
