@@ -1,7 +1,10 @@
+import os
 from typing import List, Dict, Tuple
+
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
+import uproot
 
 import ROOT
 from ROOT import TH1F
@@ -12,8 +15,6 @@ from ROOT import TLegend #It is necessary to plot labels when you plot many hist
 from ROOT import TFile #It is necessary to save histograms in a .root file.
 
 from UniandesFramework.reader.particle import Particle
-
-import uproot
 
 class Quiet:
     ''' Context manager for silencing certain ROOT operations.  Usage:
@@ -173,7 +174,6 @@ def overlap_histos(
         log_scale: bool = False, grid: bool = False
         ) -> Tuple[THStack, TCanvas, TLegend]:
     '''Uses ROOT to overlap histograms using all kinematic variable's histograms contained in a directory.
-    
     Parameters:
         kinematic_variable (str): Name of the kinematic variable. It must be also the key to access the corresponding histograms inside dict_histos.
         dict_histos (dict): Directory that contains all the histograms. This dictionary should have keys with the name of the signals, 
@@ -286,12 +286,28 @@ def generate_csv(dictionary_list :list ,file_name: str) -> None:
         raise TypeError("file_name must be a string")
     
     Data = pd.DataFrame()
-    for directory_kinematics in dictionary_list:
-        row = pd.DataFrame.from_dict(directory_kinematics, orient = "index").T
+
+    for dictionary_kinematics in dictionary_list:
+        row = pd.DataFrame.from_dict(dictionary_kinematics, orient = "index").T
         Data = pd.concat([Data,row]) 
         Data.reset_index(drop=True, inplace=True)
     Data.to_csv(file_name, index= False)
     
+def Save_Histograms_png(path_to_save, Dict_Hist, Log_Y = False):
+    ''' Uses Root to save all histograms contained in a python dictionary (Dict_Hist) as .png files. This function uses the keys of the dictionary to save each histogram.  
+    Parameters:
+        path_to_save (string): Folder name that will be used to save all histogramas as .png files.
+        Dict_Hist (Python Dictionary)*: It is the dictionary that contains all the histograms. 
+        Log_Y (Boolean): If it is True, the histogram will be plotted using log 10 Y-scale.   
+    '''  
+    for key in Dict_Hist.keys():
+        histo = Dict_Hist[key]
+        canvas = TCanvas(key, " ", 0, 0, 1280, 720)
+        canvas.SetGrid()
+        if Log_Y: canvas.SetLogy()
+        histo.Draw("hist")
+        canvas.SaveAs(os.path.join(path_to_save,f"histograms_{key}.png").replace('#', '').replace('{', '').replace('}', '').replace(' ', '_'))        
+        
 def write_root_file(file_name: str, dict_Hist : Dict[str, TH1F]) -> None:
     """
     This function writes a root file with the histograms contained in a dictionary.
@@ -325,11 +341,30 @@ def read_root_file(path_root_file: str, expected_keys: list) -> dict:
     File = TFile.TFile.Open(path_root_file, 'READ')
     for key in expected_keys:
         histogram = File.Get(key)
-        histogram.SetDirectory(0)
+        try: histogram.SetDirectory(0)
+        except: pass
         Dict_hist[key] = histogram
     File.Close()
     return Dict_hist
-    
+               
+def review_holes_in_histograms(Dict_Hist):
+    ''' Returns a list with the names of all histograms with holes contained in a python dictionary (Dict_Hist). 
+    Parameters:
+        Dict_Hist (Python Dictionary)*: It is the dictionary that contains all the histograms. 
+    Return:
+        Python list: List with the names of all histograms with holes.
+    '''  
+    keys_histos_with_holes = []
+    for key in Dict_Hist.keys():
+        histo = Dict_Hist[key]
+        
+        for i in range(1,histo.GetNbinsX()+1): 
+            if (histo.GetBinContent(i) == 0): 
+                keys_histos_with_holes.append(key)
+                break
+                break
+    return keys_histos_with_holes
+
 def write_txt_file_with_high_per_bin(file_name, Dict_Hist) -> None:
     """
     This function writes a txt file with the number of events per bin of each histogram contained in a dictionary.
@@ -340,4 +375,5 @@ def write_txt_file_with_high_per_bin(file_name, Dict_Hist) -> None:
     for key in Dict_Hist.keys():
         histo = Dict_Hist[key]
         high_list = [histo.GetBinContent(i) for i in range(1, histo.GetNbinsX())]
-        np.savetxt(f'{file_name}_{key}.txt', high_list)
+        txt_name = f'{file_name}_{key}.dat'
+        np.savetxt(txt_name.replace('#', '').replace('{', '').replace('}', '').replace(' ', '_'), high_list)

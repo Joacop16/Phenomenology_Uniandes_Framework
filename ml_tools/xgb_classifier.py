@@ -1,6 +1,7 @@
 from multiprocessing import cpu_count
 from multiprocessing import Pool
 
+import os
 import numpy as np
 import pandas as pd
 from xgboost  import XGBClassifier
@@ -9,7 +10,6 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.decomposition import PCA
-
 
 from Uniandes_Framework.ml_tools.abstract_classifier import Abstract_Classifier
 from Uniandes_Framework.ml_tools import tools
@@ -58,7 +58,7 @@ class XGB_Classifier(Abstract_Classifier):
             self._nthread=4
         self._parameters=kwargs.get("parameters",DEF_PARAMETERS)
         super().__init__(*args,**kwargs)
-            
+        
     def _get_good_model(self):
         
         gbc = XGBClassifier(
@@ -140,13 +140,25 @@ class XGB_Classifier(Abstract_Classifier):
         self.feat_importants = feat_importants
         
         return feat_importants
-
-
-    def filter_by_features(self, best_features = None, n_pca = 0):
+        
+    def filter_by_features(self, best_features = None, n_pca = 10, before_pca_matrix = ''):
         if not (best_features): best_features = self.get_most_important_features()
         self.bkg_data_balanced = self.bkg_data_balanced.loc[:, best_features]
         self.signal_data_balanced = self.bkg_data_balanced.loc[:, best_features]
         self.trainPred = self.trainPred.loc[:, best_features]
         self.testPred = self.testPred.loc[:, best_features]
+        #First Attempt of PCA:
         
-        pca = PCA(n_componets = n_pca)
+        if before_pca_matrix != '':
+            self.Matrix_Transformation = np.asmatrix(pd.read_csv(before_pca_matrix))
+            self.trainPredPCA = pd.DataFrame(np.asmatrix(self.trainPred)@self.Matrix_Transformation)
+        else:           
+            pca = PCA(n_components = n_pca)
+            self.pca = pca.fit_transform(self.trainPred)
+            self.Matrix_Transformation = np.linalg.pinv(np.asmatrix(self.trainPred))@pca
+            
+            self.trainPredPCA = pd.DataFrame(self.pca)
+            self.testPredPCA = pd.DataFrame(np.asmatrix(self.testPred)@self.Matrix_Transformation)
+            
+            path_to_save = os.path.join(os.getcwd(), f"{self.model_name}.csv")
+            pd.DataFrame(self.Matrix_Transformation).to_csv(path_to_save, index = False)
