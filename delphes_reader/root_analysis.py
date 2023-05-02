@@ -13,7 +13,7 @@ from ROOT import THStack #It is necessary to plot many histograms at the same ti
 from ROOT import TLegend #It is necessary to plot labels when you plot many histograms at the same time with ROOT.
 from ROOT import TFile #It is necessary to save histograms in a .root file.
 
-from UniandesFramework.reader.particle import Particle
+from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particle
 
 class Quiet:
     ''' Context manager for silencing certain ROOT operations.  Usage:
@@ -167,7 +167,7 @@ def histos_matplotlib(Dataset: pd.DataFrame, column_key: str, log: bool = False,
 
 def overlap_histos(
         kinematic_variable: str, 
-        dict_histos: Dict[str, Dict[str, TH1]], 
+        dict_histos: Dict[str, Dict[str, TH1F]], 
         alpha: float = 0.05,
         stack: bool = False, 
         log_scale: bool = False, grid: bool = False
