@@ -4,7 +4,6 @@ from typing import List, Dict, Tuple
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import uproot
 
 import ROOT
 from ROOT import TH1F
@@ -293,10 +292,6 @@ def generate_csv(dictionary_list :list ,file_name: str) -> None:
         Data.reset_index(drop=True, inplace=True)
     Data.to_csv(file_name, index= False)
     
-import os
-from typing import Dict
-import numpy as np
-import ROOT
 
 def save_histograms_png(path_to_save: str, dict_hist: Dict[str, TH1F], log_y: bool = False) -> None:
     """Save histograms as .png files.
@@ -380,7 +375,7 @@ def review_holes_in_histograms(Dict_Hist: Dict[str, TH1F]) -> List[str]:
     return keys_histos_with_holes
 
 
-def write_txt_file_with_high_per_bin(file_name, Dict_Hist) -> None:
+def write_txt_file_with_high_per_bin(file_name :str, Dict_Hist :Dict[str, TH1F]) -> None:
     """
     This function writes a txt file with the number of events per bin of each histogram contained in a dictionary.
     Parameters:
