@@ -254,12 +254,12 @@ class Particle(ABC):
         eta_min_cut=kin_cuts.get("eta_min_cut")
         eta_max_cut=kin_cuts.get("eta_max_cut")
         
-        pt_cond= (self.pt()>= pt_min_cut)
+        pt_cond= (self.pt>= pt_min_cut)
         if pt_max_cut:
             if not (pt_max_cut>pt_min_cut):
                 raise Exception("Error: pt_max must be major than pt_min")
-            pt_cond = pt_cond and (self.pt()<= pt_max_cut)
-        eta_cond = (self.eta()>= eta_min_cut) and (self.eta()<= eta_max_cut)
+            pt_cond = pt_cond and (self.pt<= pt_max_cut)
+        eta_cond = (self.eta>= eta_min_cut) and (self.eta<= eta_max_cut)
         
         if (pt_cond and eta_cond):
             self.set_good_tag(1)
