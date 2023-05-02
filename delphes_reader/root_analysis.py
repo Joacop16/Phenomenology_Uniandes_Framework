@@ -293,20 +293,34 @@ def generate_csv(dictionary_list :list ,file_name: str) -> None:
         Data.reset_index(drop=True, inplace=True)
     Data.to_csv(file_name, index= False)
     
-def Save_Histograms_png(path_to_save, Dict_Hist, Log_Y = False):
-    ''' Uses Root to save all histograms contained in a python dictionary (Dict_Hist) as .png files. This function uses the keys of the dictionary to save each histogram.  
+import os
+from typing import Dict
+import numpy as np
+import ROOT
+
+def save_histograms_png(path_to_save: str, dict_hist: Dict[str, TH1F], log_y: bool = False) -> None:
+    """Save histograms as .png files.
+
     Parameters:
-        path_to_save (string): Folder name that will be used to save all histogramas as .png files.
-        Dict_Hist (Python Dictionary)*: It is the dictionary that contains all the histograms. 
-        Log_Y (Boolean): If it is True, the histogram will be plotted using log 10 Y-scale.   
-    '''  
-    for key in Dict_Hist.keys():
-        histo = Dict_Hist[key]
-        canvas = TCanvas(key, " ", 0, 0, 1280, 720)
+        path_to_save: Folder name that will be used to save all histograms as .png files.
+        dict_hist: Dictionary that contains all the histograms.
+        log_y: If True, the histogram will be plotted using log 10 Y-scale.
+    """
+
+    if not isinstance(path_to_save, str):
+        raise TypeError("path_to_save must be a string")
+    if not all(isinstance(histo, TH1F) for histo in dict_hist.values()):
+        raise TypeError("dict_hist must be a dictionary of TH1F")
+    if not isinstance(log_y, bool):
+        raise TypeError("log_y must be a boolean")
+    
+    for key, histo in dict_hist.items():
+        canvas = ROOT.TCanvas(key, "", 0, 0, 1280, 720)
         canvas.SetGrid()
-        if Log_Y: canvas.SetLogy()
+        if log_y:
+            canvas.SetLogy()
         histo.Draw("hist")
-        canvas.SaveAs(os.path.join(path_to_save,f"histograms_{key}.png").replace('#', '').replace('{', '').replace('}', '').replace(' ', '_'))        
+        canvas.SaveAs(os.path.join(path_to_save, f"histograms_{key}.png").replace("#", "").replace("{", "").replace("}", "").replace(" ", "_"))       
         
 def write_root_file(file_name: str, dict_Hist : Dict[str, TH1F]) -> None:
     """
@@ -347,23 +361,24 @@ def read_root_file(path_root_file: str, expected_keys: list) -> dict:
     File.Close()
     return Dict_hist
                
-def review_holes_in_histograms(Dict_Hist):
-    ''' Returns a list with the names of all histograms with holes contained in a python dictionary (Dict_Hist). 
+def review_holes_in_histograms(Dict_Hist: Dict[str, TH1F]) -> List[str]:
+    """
+    Returns a list with the names of all histograms with holes contained in a python dictionary (Dict_Hist).
     Parameters:
-        Dict_Hist (Python Dictionary)*: It is the dictionary that contains all the histograms. 
+        Dict_Hist (Dict[str, TH1F]): It is the dictionary that contains all the histograms.
     Return:
-        Python list: List with the names of all histograms with holes.
-    '''  
+        List[str]: List with the names of all histograms with holes.
+    """
+
+    if not all(isinstance(histogram, TH1F) for histogram in Dict_Hist.values()):
+        raise TypeError("Dict_Hist must be a dictionary of TH1F histograms")
+    
     keys_histos_with_holes = []
-    for key in Dict_Hist.keys():
-        histo = Dict_Hist[key]
-        
-        for i in range(1,histo.GetNbinsX()+1): 
-            if (histo.GetBinContent(i) == 0): 
-                keys_histos_with_holes.append(key)
-                break
-                break
+    for key, histo in Dict_Hist.items():
+        if any(histo.GetBinContent(i) == 0 for i in range(1, histo.GetNbinsX()+1)):
+            keys_histos_with_holes.append(key)
     return keys_histos_with_holes
+
 
 def write_txt_file_with_high_per_bin(file_name, Dict_Hist) -> None:
     """
