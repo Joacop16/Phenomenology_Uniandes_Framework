@@ -1,8 +1,8 @@
 import gzip
 import numpy as np
 import xml.etree.ElementTree as ET
-from delphes_reader.loader import DEF_PATHS
-from delphes_reader.loader import DelphesLoader
+from Uniandes_Framework.delphes_reader.loader import DelphesLoader
+from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particle as AbstractParticle
 from ROOT import TLorentzVector , TVector2 , TVector3
 
 def get_kinematics_row(*args):
@@ -27,13 +27,13 @@ def get_kinematics_row(*args):
     return row
 
 class LHE_Loader(DelphesLoader):
-    def __init__(self, name_signal, path=DEF_PATHS):       
+    def __init__(self, name_signal, path=None):
         super().__init__(name_signal,path)
         #get the lhe.gz outputs
         self._glob='**/*.lhe.gz'
         self.Forest = self._get_forest()
         
-class Particle:
+class Particle():
     def __init__(self,pdgid,spin,px=0,py=0,pz=0,energy=0,mass=0):
         self.pdgid=pdgid
         self.px=px
@@ -44,11 +44,11 @@ class Particle:
         self.spin=spin
         typep=abs(pdgid)
         if ((typep==2) or (typep==4) or (typep==6)):
-            self.Charge+=np.sign(pdgid)*2./3.
+            self.Charge=+np.sign(pdgid)*2./3.
         elif ((typep==1) or (typep==3) or (typep==5)):
-            self.Charge-=np.sign(pdgid)*1./3.
+            self.Charge=-np.sign(pdgid)*1./3.
         elif ((typep==11) or (typep==13) or (typep==15)):
-            self.Charge-=np.sign(pdgid)
+            self.Charge=-np.sign(pdgid)
         else: 
             self.Charge=0.0
     def SetName(self,name):
@@ -72,7 +72,11 @@ class Particle:
     @property
     def p(self):
         return self.p4.P()
-    
+
+    @property
+    def m(self):
+        return self.p4.M()
+
     @property
     def eta(self):
         return self.p4.Eta()

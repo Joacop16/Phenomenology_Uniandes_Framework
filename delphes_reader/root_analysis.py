@@ -49,29 +49,30 @@ def get_kinematics_row(particles : list)->dict:
         raise TypeError("Particles must be a list of Particle objects")
 
     if any( not isinstance(particle, Particle) for particle in particles):
-        raise TypeError("Particles must be a list of Particle objects")
+        #raise TypeError("Particles must be a list of Particle objects")
+        pass
 
     row = {}
     for i, particle in enumerate(particles):
 
         # Save main kinematic variables
         name = particle.Name
-        row[f"pT_{name}(GeV)"] = particle.pt
-        row[f"#eta_{name}"] = particle.eta
-        row[f"#phi_{name}"] = particle.phi
-        row[f"Energy_{name}(GeV)"] = particle.energy
-        row[f"Mass_{name}(GeV)"] = particle.m
+        row[f"pT_{{{name}}}(GeV)"]=particle.pt
+        row[f"#eta_{{{name}}}"]=particle.eta
+        row[f"#phi_{{{name}}}"]=particle.phi
+        row[f"Energy_{{{name}}}(GeV)"]=particle.energy
+        row[f"Mass_{{{name}}}(GeV))"] = particle.m
 
         # Calculate Delta Functions with other particles
         for j in range(i+1, len(particles)):
             co_particle = particles[j]
             co_name = co_particle.Name
-            row[f"#Delta R_{name}{co_name}"] = particle.DeltaR(co_particle)
-            row[f"#Delta #eta_{name}{co_name}"] = particle.DeltaEta(co_particle)
-            row[f"#Delta #phi_{name}{co_name}"] = particle.DeltaPhi(co_particle)
-            row[f"#Delta pT_{name}{co_name}(GeV)"] = particle.sDeltaPT(co_particle)
-            row[f"#Delta #vec{{pT}}_{name}{co_name}(GeV)"] = particle.vDeltaPT(co_particle)
-            row[f"#Delta #vec{{p}}_{name}{co_name}(GeV)"] = particle.vDeltaP(co_particle)
+            row[f"#Delta{{R}}_{{{name}{co_name}}}"]=particle.DeltaR(co_particle)
+            row[f"#Delta{{#eta}}_{{{name}{co_name}}}"]=particle.DeltaEta(co_particle)
+            row[f"#Delta{{#phi}}_{{{name}{co_name}}}"]=particle.DeltaPhi(co_particle)
+            row[f"#Delta{{pT}}_{{{name}{co_name}}}(GeV)"]=particle.sDeltaPT(co_particle)
+            row[f"#Delta{{#vec{{pT}}}}_{{{name}{co_name}}}(GeV)"]=particle.vDeltaPT(co_particle)
+            row[f"#Delta{{#vec{{p}}}}_{{{name}{co_name}}}(GeV)"]=particle.vDeltaP(co_particle)
     return row
 
 default_hist_bins_dict={
