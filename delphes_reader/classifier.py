@@ -212,10 +212,6 @@ def get_good_jets(event_particles, kin_cuts=None):
         jets_dict = event_particles
     else:
         jets_dict = get_jets(event_particles)
-    
-    good_jets_dict = {}
-    for key in jets_dict.keys():
-        good_jets = [ jet for jet in jets_dict[key] if jet.get_good_tag(kin_cuts) == 1 ]
-        good_jets_dict[key] = good_jets
-    
-    return good_jets_dict
+       
+        
+    return get_good_particles(jets_dict,kin_cuts)
