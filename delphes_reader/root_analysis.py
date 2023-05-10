@@ -76,12 +76,12 @@ def get_kinematics_row(particles : list)->dict:
     return row
 
 default_hist_bins_dict={
-    "#Delta R":[96,0,7],
-    "#Delta #eta":[80,-5,5],
-    "#Delta #phi":[52,-3.25,3.25],
-    "#Delta pT":[120, 0.0, 1500.0],
-    "#Delta #vec{pT}":[240, 0.0, 4800.0],
-    "#Delta #vec{p}":[240, 0.0, 4800.0],
+    "#Delta{R}":[96,0,7],
+    "#Delta{#eta}":[80,-5,5],
+    "#Delta{#phi}":[52,-3.25,3.25],
+    "#Delta{pT}":[120, 0.0, 1500.0],
+    "#Delta{#vec{pT}}":[240, 0.0, 4800.0],
+    "#Delta{#vec{p}}":[240, 0.0, 4800.0],
     "MET(GeV)":[80, 0.0, 1000.0],
     "pT_": [160, 0.0, 2000.0],
     "sT(GeV)": [200, 0.0, 4000.0],
@@ -118,10 +118,9 @@ def make_histograms(df: pd.DataFrame, integral: float = 1.0, hist_bins_dict: dic
                 x_axis = column.replace('(', '[').replace(')', ']')
                 hist = ROOT.TH1F(column, f"{x_axis}; Events", bins[0], bins[1], bins[2])
                 hist.SetDirectory(0)
-                hist.FillN(df[column].values, len(df[column]))
+                [hist.Fill(dato) for dato in df[column]]
                 hist.Scale(integral / hist.Integral() if hist.Integral() != 0 else 1.0)
                 hist_dict[column] = hist
-
     return hist_dict
 
 def histos_matplotlib(
@@ -241,8 +240,8 @@ def overlap_histos(
 
     if log_scale:
         canvas.SetLogy()
-        histos.SetMinimum(10)
-        histos.SetMaximum(1e8)
+        #histos.SetMinimum(10)
+        #histos.SetMaximum(1e8)
 
     if grid:
         canvas.SetGrid()
