@@ -81,7 +81,14 @@ def get_muons(event):
     Return:
         list: Contains all muon particles.
     '''    
-    return [MuonParticle(event, entry) for entry in range(event.Muon.GetEntries())]
+    # get all muons
+    muons = [MuonParticle(event, entry) for entry in range(event.Muon.GetEntries())]
+    # sort muons by pt descending
+    muons.sort(reverse=True, key=lambda x: x.pt)
+    # set name of each muon
+    for j, muon in enumerate(muons):
+        muon.SetName(f"muon_{{{j}}}")
+    return muons
 
 def get_electrons(event):
     ''' Returns a list of electron particles present in a Delphes file event.
@@ -90,7 +97,14 @@ def get_electrons(event):
     Return:
         List[ElectronParticle]: List that contains all electrons.
     ''' 
-    return [ElectronParticle(event, entry) for entry in range(event.Electron.GetEntries())]
+    # get all electrons
+    electrons = [ElectronParticle(event, entry) for entry in range(event.Electron.GetEntries())]
+    # sort electrons by pt descending
+    electrons.sort(reverse=True, key=lambda x: x.pt)
+    # set name of each electron
+    for j, electron in enumerate(electrons):
+        electron.SetName(f"electron_{{{j}}}")
+    return electrons
 
 def get_leptons(event):
     ''' Returns a python directory that contains all leptons (muon and electron particles) that are present in an delphes file event.
@@ -99,14 +113,15 @@ def get_leptons(event):
     Return:
         Particle (python directory): Directory that contains all leptons.
     '''
+    # get all leptons
     lepton_dic={
         'electron': get_electrons(event),
         'muon' : get_muons(event)
     }
-    
+    # sort leptons by pt descending
     for key in lepton_dic.keys():
         lepton_dic[key].sort(reverse=True, key=lambda x: x.pt)
-    
+
     return lepton_dic
 
 def get_jets(event):
