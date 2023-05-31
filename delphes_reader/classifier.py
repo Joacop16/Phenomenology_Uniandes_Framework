@@ -86,8 +86,9 @@ def get_muons(event):
     # sort muons by pt descending
     muons.sort(reverse=True, key=lambda x: x.pt)
     # set name of each muon
-    for j, muon in enumerate(muons):
-        muon.SetName(f"muon_{{{j}}}")
+    for n, muon in enumerate(muons):
+        j = n + 1
+        muon.SetName(f"#mu_{{{j}}}")
     return muons
 
 def get_electrons(event):
@@ -102,8 +103,9 @@ def get_electrons(event):
     # sort electrons by pt descending
     electrons.sort(reverse=True, key=lambda x: x.pt)
     # set name of each electron
-    for j, electron in enumerate(electrons):
-        electron.SetName(f"electron_{{{j}}}")
+    for n, electron in enumerate(electrons):
+        j = n + 1
+        electron.SetName(f"e_{{{j}}}")
     return electrons
 
 def get_leptons(event):
