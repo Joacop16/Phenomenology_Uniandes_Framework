@@ -30,7 +30,7 @@ class DelphesLoader():
     """
 
     # Constructor
-    def __init__(self, name_signal: str, path: str=None) -> None:
+    def __init__(self, name_signal: str, path: str=None, **kwargs) -> None:
         """
         Parameters
         ----------
@@ -55,7 +55,7 @@ class DelphesLoader():
         self.xs = data[self.name][1]
         
         # Get the delphes root outputs
-        self.Forest = self._get_forest()
+        self.Forest = self._get_forest(kwargs.get('glob', '**/*.root'))
         
         load=self.name+" imported with "
         load+=str(len(self.Forest)) + " trees!\n"
@@ -114,8 +114,6 @@ class DelphesLoader():
         str
             Glob to search the delphes root outputs
         """
-        if not hasattr(self, "_glob"):
-            self.set_glob('**/*.root')
         return self._glob
 
     # Get the delphes root outputs
@@ -125,7 +123,7 @@ class DelphesLoader():
 
         parameters
         ----------
-        glob : str, optional
+        glob : str,
             Glob to search the delphes root outputs, by default None
 
         returns
@@ -134,10 +132,7 @@ class DelphesLoader():
             Ordered list with the delphes root outputs
         """
 
-        if glob is None:
-            glob = self.get_glob()
-        else: 
-            self.set_glob(glob)
+        self.set_glob(glob)
         def natural_sort(l): 
             import re
             convert = lambda text: int(text) if text.isdigit() else text.lower()

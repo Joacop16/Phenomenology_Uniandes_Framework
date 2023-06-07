@@ -28,10 +28,7 @@ def get_kinematics_row(*args):
 
 class LHE_Loader(DelphesLoader):
     def __init__(self, name_signal, path=None):
-        super().__init__(name_signal,path)
-        #get the lhe.gz outputs
-        self._glob='**/*.lhe.gz'
-        self.Forest = self._get_forest()
+        super().__init__(name_signal,path, glob = '**/*.lhe.gz')
         
 class Particle():
     def __init__(self,pdgid,spin,px=0,py=0,pz=0,energy=0,mass=0):
