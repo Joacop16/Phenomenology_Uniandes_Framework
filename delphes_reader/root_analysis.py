@@ -252,7 +252,7 @@ def overlap_histos(
     return histos, canvas, legend
 
 
-def sum_histos(histo_list: List[TH1F]) -> TH1F:
+def sum_histos(histo_list: List[TH1F], substract = False) -> TH1F:
     '''Sums histograms in a list using ROOT library.
     Parameters:
         histo_list (List[TH1F]): List of histograms to be summed.
@@ -276,9 +276,13 @@ def sum_histos(histo_list: List[TH1F]) -> TH1F:
     result = TH1F('sum', 'sum', nbins, xlow, xup)
     result.SetDirectory(0)
     
-    # Sum histograms and errors
-    for histo in histo_list:
-        result.Add(histo)
+    if substract:
+        result.Add(histo_list[0])
+        for n in range(1, len(histo_list)): result.Add(histo_list[n], -1.0)
+    else:
+        # Sum histograms and errors
+        for histo in histo_list:
+            result.Add(histo)
     
     return result
 
