@@ -9,7 +9,7 @@ import uproot
 import joblib
 import os
 
-from Uniandes_Framework.delphes_reader.root_analysis import Write_ROOT_File, Write_txt_file_with_high_per_bin
+from Uniandes_Framework.delphes_reader.root_analysis import write_root_file, write_txt_file_with_high_per_bin
 
 def concat_signals(path_csv_list, balance = True):
     ''' Read a list of Dataframe's paths and concatenate them in a Bigger Dataframe that contains all data.
@@ -154,7 +154,7 @@ def hist_discriminator(path_model, csv_dict, path_to_save = '', best_features = 
             c1.SaveAs(os.path.join(path_to_save,f"histogram_{name}_{key}.png"))
             
     if (path_to_save != ''): 
-        Write_ROOT_File(os.path.join(path_to_save,f"Histograms_{name}.root"), histos)
-        Write_txt_file_with_high_per_bin(os.path.join(path_to_save,f"high_per_bin_{name}"), histos)
+        write_root_file(os.path.join(path_to_save,f"Histograms_{name}.root"), histos)
+        write_txt_file_with_high_per_bin(os.path.join(path_to_save,f"high_per_bin_{name}"), histos)
         
     return histos    
