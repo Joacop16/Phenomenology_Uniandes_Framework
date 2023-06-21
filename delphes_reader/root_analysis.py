@@ -267,7 +267,8 @@ def sum_histos(histo_list: List[TH1F], substract = False) -> TH1F:
     # Check that all histograms have the same number of bins and bin width
     bin_width = histo_list[0].GetBinWidth(0)
     nbins = histo_list[0].GetNbinsX()
-    if any(histo.GetNbinsX() != nbins or histo.GetBinWidth(0) != bin_width for histo in histo_list):
+    
+    if any(histo.GetNbinsX() != nbins or not np.isclose(histo.GetBinWidth(0), bin_width) for histo in histo_list):
         raise ValueError("All histograms must have the same number of bins and bin width")
     
     # Initialize result histogram with bin information
