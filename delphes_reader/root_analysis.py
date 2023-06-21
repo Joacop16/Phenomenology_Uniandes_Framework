@@ -388,6 +388,19 @@ def review_holes_in_histograms(Dict_Hist: Dict[str, TH1F]) -> List[str]:
             keys_histos_with_holes.append(key)
     return keys_histos_with_holes
 
+def fill_holes_in_histogram(histo, value_to_fill = 10e-4) -> List[str]:
+    """
+    Fill all the holes contained in a histogram.
+    
+    Parameters:
+        histo (TH1F): histograms with holes.
+        value_to_fill (Float): value that will be used to fill the histogram holes.
+    Return:
+        histo (TH1F): histogram without holes.
+    """
+    for i in range(1, histo.GetNbinsX()+1): 
+        if (histo.GetBinContent(i) == 0 ): histo.SetBinContent(i, value_to_fill)
+    return histo
 
 def write_txt_file_with_high_per_bin(file_name :str, Dict_Hist :Dict[str, TH1F]) -> None:
     """
