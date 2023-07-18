@@ -149,16 +149,16 @@ class XGB_Classifier(Abstract_Classifier):
         self.testPred = self.testPred.loc[:, best_features]
         #First Attempt of PCA:
         
-        if before_pca_matrix != '':
-            self.Matrix_Transformation = np.asmatrix(pd.read_csv(before_pca_matrix))
-            self.trainPredPCA = pd.DataFrame(np.asmatrix(self.trainPred)@self.Matrix_Transformation)
-        else:           
-            pca = PCA(n_components = n_pca)
-            self.pca = pca.fit_transform(self.trainPred)
-            self.Matrix_Transformation = np.linalg.pinv(np.asmatrix(self.trainPred))@pca
+        # if before_pca_matrix != '':
+        #     self.Matrix_Transformation = np.asmatrix(pd.read_csv(before_pca_matrix))
+        #     self.trainPredPCA = pd.DataFrame(np.asmatrix(self.trainPred)@self.Matrix_Transformation)
+        # else:           
+        #     pca = PCA(n_components = n_pca)
+        #     self.pca = pca.fit_transform(self.trainPred)
+        #     self.Matrix_Transformation = np.linalg.pinv(np.asmatrix(self.trainPred))@pca
             
-            self.trainPredPCA = pd.DataFrame(self.pca)
-            self.testPredPCA = pd.DataFrame(np.asmatrix(self.testPred)@self.Matrix_Transformation)
+        #     self.trainPredPCA = pd.DataFrame(self.pca)
+        #     self.testPredPCA = pd.DataFrame(np.asmatrix(self.testPred)@self.Matrix_Transformation)
             
-            path_to_save = os.path.join(os.getcwd(), f"{self.model_name}.csv")
-            pd.DataFrame(self.Matrix_Transformation).to_csv(path_to_save, index = False)
+        #     path_to_save = os.path.join(os.getcwd(), f"{self.model_name}.csv")
+        #     pd.DataFrame(self.Matrix_Transformation).to_csv(path_to_save, index = False)
