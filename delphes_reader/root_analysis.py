@@ -12,6 +12,7 @@ from ROOT import TH1F #It is necessary to plot histograms with ROOT.
 from ROOT import THStack #It is necessary to plot many histograms at the same time with ROOT.
 from ROOT import TLegend #It is necessary to plot labels when you plot many histograms at the same time with ROOT.
 from ROOT import TFile #It is necessary to save histograms in a .root file.
+import uproot
 
 from Uniandes_Framework.delphes_reader.particle.abstract_particle import Particle
 
@@ -345,10 +346,26 @@ def write_root_file(file_name: str, dict_Hist : Dict[str, TH1F]) -> None:
     
 
     ROOT_File = TFile.Open(file_name, 'RECREATE') 
-    
+
+    [dict_Hist[key].SetName(key) for key in dict_Hist.keys()]
     [dict_Hist[key].Write() for key in dict_Hist.keys()]
 
     ROOT_File.Close()
+
+def get_root_file_keys(path_root_file: str) -> dict:
+    """
+    This function returns the keys of the histograms contained in a root file.
+    Parameters:
+        path_root_file (string): It is the path of the root file.
+        
+    Returns:
+        keys (list): It is a list with the names of the histograms that are in the root file.
+    """
+    
+    file = uproot.open(path_root_file)
+    keys = [key.replace(';1', '') for key in file.keys()]
+    file.close()
+    return keys
     
 def read_root_file(path_root_file: str, expected_keys: list) -> dict:
     """
@@ -414,3 +431,32 @@ def write_txt_file_with_high_per_bin(file_name :str, Dict_Hist :Dict[str, TH1F])
         high_list = [histo.GetBinContent(i) for i in range(1, histo.GetNbinsX())]
         txt_name = f'{file_name}_{key}.dat'
         np.savetxt(txt_name.replace('#', '').replace('{', '').replace('}', '').replace(' ', '_'), high_list)
+
+def extract_branching_ratio_from_param_card(path_paramcard, PID1, PID2):
+    """
+    This function reads a paramcard file and extracts the Branching ratio that corresponds to PID1 and PID2.
+    Parameters:
+        path_paramcard (string): It is the path of the paramcard.
+        PID1 (float): Particle ID (PID) of particle 1.
+        PID2 (float): Particle ID (PID) of particle 2.
+
+    Returns:
+        BR (float): Branching Ratio.
+    """    
+    
+    ID1 = str(ID1)
+    ID2 = str(ID2)
+    with open(f'{path_paramcard}', 'r') as file:
+        d = file.readlines()
+        position = int(np.where(np.array(d) == '#  BR             NDA  ID1    ID2   ...\n')[0]) # Position of  '#  BR             NDA  ID1    ID2   ...\n' 
+    
+        for i in range(position, len(d)):
+            row = d[i].rstrip().split(" ")
+        
+            if not (ID1 in row): continue
+            if not (ID2 in row): continue
+    
+            BR = row[3]
+            break
+            
+    return float(BR)
