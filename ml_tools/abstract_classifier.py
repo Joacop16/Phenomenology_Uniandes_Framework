@@ -26,8 +26,8 @@ class Abstract_Classifier(ABC):
         self.signal_data_balanced = tools.concat_data(signal_dataframe_list, balance = balanced)
         self.bkg_data_balanced = tools.concat_data(bkg_dataframe_list, balance = balanced)
                 
-        X , Y = tools.prepare_to_train(self.signal_data_balanced,self.bkg_data_balanced, balance = True)
-        self.trainPred, self.testPred, self.trainLab, self.testLab = train_test_split(X, Y, test_size=0.20)
+        self.X , self.Y = tools.prepare_to_train(self.signal_data_balanced,self.bkg_data_balanced, balance = True)
+        self.trainPred, self.testPred, self.trainLab, self.testLab = train_test_split(self.X, self.Y, test_size=0.20)
         
     def fit_model(self):
         self.model.fit(self.trainPred, self.trainLab)

@@ -116,6 +116,7 @@ def hist_discriminator(path_model, csv_dict, path_to_save = '', best_features = 
         path_model (string): Path of the machine learning model that will be used to plot the histograms.
         csv_dict (Python dictionary): dictionary with the name of the signal an its respectively csv file path.
         path_to_save (String): Path of the folder that we will be used to save all the histograms.
+        best_features (String): Python list of features that will be used to filter the .csv columns. 
     Return:
         TH1F (Python dictionary): Directory with machine learning discriminator histograms. 
     '''
@@ -146,6 +147,7 @@ def hist_discriminator(path_model, csv_dict, path_to_save = '', best_features = 
         histos[key] = histo
 
         if (path_to_save != ''):
+            os.makedirs(path_to_save, exist_ok= True)
             c1 = TCanvas( f'c-{key}', '', 0, 0, 1280, 720)
             c1.SetGrid()
             c1.SetLogy()
@@ -153,7 +155,8 @@ def hist_discriminator(path_model, csv_dict, path_to_save = '', best_features = 
             Data.to_csv(os.path.join(path_to_save,f"score_{name}_{key}.csv"),index=False)
             c1.SaveAs(os.path.join(path_to_save,f"histogram_{name}_{key}.png"))
             
-    if (path_to_save != ''): 
+    if (path_to_save != ''):
+        os.makedirs(path_to_save, exist_ok= True)
         write_root_file(os.path.join(path_to_save,f"Histograms_{name}.root"), histos)
         write_txt_file_with_high_per_bin(os.path.join(path_to_save,f"high_per_bin_{name}"), histos)
         
